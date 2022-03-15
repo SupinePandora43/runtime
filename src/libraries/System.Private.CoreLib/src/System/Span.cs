@@ -43,8 +43,8 @@ namespace System
             if (!typeof(T).IsValueType && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
-            _pointer = new ByReference<T>(ref MemoryMarshal.GetArrayDataReference(array));
             _length = array.Length;
+            _pointer = new ByReference<T>(_length is 0 ? ref Unsafe.NullRef<T>() : ref MemoryMarshal.GetArrayDataReference(array));
         }
 
         /// <summary>
@@ -107,8 +107,8 @@ namespace System
             if (length < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException();
 
-            _pointer = new ByReference<T>(ref Unsafe.As<byte, T>(ref *(byte*)pointer));
             _length = length;
+            _pointer = new ByReference<T>(_length is 0 ? ref Unsafe.NullRef<T>() : ref Unsafe.As<byte, T>(ref *(byte*)pointer));
         }
 
         // Constructor for internal use only.
@@ -254,9 +254,9 @@ namespace System
         public ref T GetPinnableReference()
         {
             // Ensure that the native code has just one forward branch that is predicted-not-taken.
-            ref T ret = ref Unsafe.NullRef<T>();
-            if (_length != 0) ret = ref _pointer.Value;
-            return ref ret;
+            //ref T ret = ref Unsafe.NullRef<T>();
+            //if (_length != 0) ret = ref _pointer.Value;
+            return ref _pointer.Value;
         }
 
         /// <summary>
